@@ -5,20 +5,13 @@ import {
     onAuthStateChanged, 
     createUserWithEmailAndPassword, 
     signInWithEmailAndPassword, 
-    signOut,
-    signInAnonymously,
-    signInWithCustomToken
+    signOut
 } from 'firebase/auth';
 import { 
     getFirestore, 
     doc, 
     setDoc, 
-    getDoc, 
     collection, 
-    addDoc, 
-    query, 
-    where, 
-    getDocs,
     onSnapshot,
     updateDoc,
     deleteDoc
@@ -39,13 +32,15 @@ const ArrowRightIcon = () => <svg xmlns="http://www.w3.org/2000/svg" className="
 const SparklesIcon = ({ className }) => <svg xmlns="http://www.w3.org/2000/svg" className={className} viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M5 2a1 1 0 011 1v1h1a1 1 0 010 2H6v1a1 1 0 11-2 0V6H3a1 1 0 110-2h1V3a1 1 0 011-1zm14 2a1 1 0 011 1v1h1a1 1 0 110 2h-1v1a1 1 0 11-2 0V9h-1a1 1 0 110-2h1V6a1 1 0 011-1zM9 11a1 1 0 011 1v1h1a1 1 0 110 2h-1v1a1 1 0 11-2 0v-1H7a1 1 0 110-2h1v-1a1 1 0 011-1z" clipRule="evenodd" /></svg>;
 
 // --- Firebase Initialization ---
+// This check handles environments where 'process' is not defined, preventing crashes.
+// In a Netlify build, process.env will be available and the correct keys will be used.
 const firebaseConfig = {
-    apiKey: process.env.REACT_APP_API_KEY,
-    authDomain: process.env.REACT_APP_AUTH_DOMAIN,
-    projectId: process.env.REACT_APP_PROJECT_ID,
-    storageBucket: process.env.REACT_APP_STORAGE_BUCKET,
-    messagingSenderId: process.env.REACT_APP_MESSAGING_SENDER_ID,
-    appId: process.env.REACT_APP_APP_ID
+    apiKey: typeof process !== 'undefined' ? process.env.REACT_APP_API_KEY : "YOUR_API_KEY",
+    authDomain: typeof process !== 'undefined' ? process.env.REACT_APP_AUTH_DOMAIN : "YOUR_AUTH_DOMAIN",
+    projectId: typeof process !== 'undefined' ? process.env.REACT_APP_PROJECT_ID : "YOUR_PROJECT_ID",
+    storageBucket: typeof process !== 'undefined' ? process.env.REACT_APP_STORAGE_BUCKET : "YOUR_STORAGE_BUCKET",
+    messagingSenderId: typeof process !== 'undefined' ? process.env.REACT_APP_MESSAGING_SENDER_ID : "YOUR_MESSAGING_SENDER_ID",
+    appId: typeof process !== 'undefined' ? process.env.REACT_APP_APP_ID : "YOUR_APP_ID"
 };
 
 const app = initializeApp(firebaseConfig);
@@ -55,6 +50,7 @@ setLogLevel('debug');
 
 // --- App ID ---
 const appId = 'lunacycle-app';
+
 // --- Authentication Context ---
 const AuthContext = createContext();
 
@@ -62,14 +58,14 @@ export const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(null);
     const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-        setUser(user);
-        setLoading(false);
-    });
+    useEffect(() => {
+        const unsubscribe = onAuthStateChanged(auth, (user) => {
+            setUser(user);
+            setLoading(false);
+        });
 
-    return () => unsubscribe();
-}, []);
+        return () => unsubscribe();
+    }, []);
 
     const value = { user, loading };
     return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
@@ -893,6 +889,18 @@ function ProfileScreen({ userData, toggleTheme, theme, setView }) {
                         </div>
                     </>
                 )}
+            </div>
+
+            <div className="mt-6 bg-blue-100/80 dark:bg-blue-900/80 backdrop-blur-sm border border-blue-200 dark:border-blue-700 rounded-lg p-4">
+                <div className="flex items-center">
+                    <BellIcon />
+                    <div>
+                        <h4 className="font-bold text-blue-800 dark:text-blue-200">Grocery List Reminders</h4>
+                        <p className="text-sm text-blue-700 dark:text-blue-300">
+                            When notifications are on, we'll remind you to shop for your favorited recipes for the week ahead!
+                        </p>
+                    </div>
+                </div>
             </div>
         </div>
     );
